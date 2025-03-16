@@ -11,7 +11,7 @@ public class Cube : MonoBehaviour
     private Color _defaultColor = Color.white;
     private Renderer _renderer;
     private ColorChanger _changer;
-    public event Action<Cube> OnCubeDeactivate;
+    public event Action<Cube> CubeDeactivated;
 
     private void Awake()
     {
@@ -29,18 +29,18 @@ public class Cube : MonoBehaviour
             if (_renderer.material.color == _initialColor)
             {
                 _changer.Changer();
-                StartCoroutine(TimeStop(lifeTime));
+                StartCoroutine(Wait(lifeTime));
             }
         }
     }
 
-    private IEnumerator TimeStop(float time)
+    private IEnumerator Wait(float time)
     {
         WaitForSeconds _sleepTime = new(time);
 
         yield return _sleepTime;
 
-        OnCubeDeactivate.Invoke(this);
+        CubeDeactivated.Invoke(this);
         _renderer.material.color = _defaultColor;
     }
 }

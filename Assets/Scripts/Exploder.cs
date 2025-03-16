@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Explode : MonoBehaviour
+public class Exploder : MonoBehaviour
 {
     private int _radius = 1000;
     private int _explosionForce = 1000;

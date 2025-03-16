@@ -10,7 +10,7 @@ public class Transparency : MonoBehaviour
     private float _startAlpha;
     private Color _defaultColor;
 
-    public event System.Action OnFadeComplete;
+    public event System.Action FadeCompleted;
 
     private void Awake()
     {
@@ -45,7 +45,7 @@ public class Transparency : MonoBehaviour
             yield return null;
         }
 
-        OnFadeComplete.Invoke();
+        FadeCompleted.Invoke();
 
         _renderer.material.color = _defaultColor;
     }

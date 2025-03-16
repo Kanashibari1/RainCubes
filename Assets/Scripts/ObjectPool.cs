@@ -3,34 +3,49 @@ using UnityEngine;
 
 public class ObjectPool<T> where T : MonoBehaviour
 {
+    private const int _capacity = 5;
+
     private List<T> _pool = new();
 
-    private int _createdObjectsCount = 0;
+    public int CreatedObjectsCount { get; private set; }
 
-    public int CreatedObjectsCount => _createdObjectsCount;
+    public ObjectPool(T _prefab)
+    {
+        for (int i = 0; i < _capacity; i++)
+        {
+            Create(_prefab);
+        }
+    }
 
-    public void Create(T @object)
+    private T Create(T @object)
     {
         T obj = GameObject.Instantiate(@object);
 
         obj.gameObject.SetActive(false);
         _pool.Add(obj);
-        _createdObjectsCount++;
+        CreatedObjectsCount++;
+        return obj;
     }
 
-    public T GetObj()
+    public T GetObj(T prototype)
     {
         if (_pool.Count > 0)
         {
-            foreach(var obj in _pool)
+            foreach (var @object in _pool)
             {
-                if(obj.gameObject.activeSelf == false)
+                if (@object.gameObject.activeSelf == false)
                 {
-                    return obj;
+                    return @object;
                 }
             }
         }
 
-        return null;
+        return Create(prototype);
+    }
+
+    public void Return(T obj)
+    {
+        obj.gameObject.SetActive(false);
+        _pool.Add(obj);
     }
 }

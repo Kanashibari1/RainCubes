@@ -1,42 +1,31 @@
+using System;
 using System.Collections;
-using TMPro;
 using UnityEngine;
 
 public class SpawnerCube : MonoBehaviour
 {
     [SerializeField] private Cube _cubePrefab;
-    [SerializeField] private TextMeshProUGUI _textMeshPro;
+    [SerializeField] private SpawnerBomb _spawnerBomb;
 
-    private ObjectPool<Cube> _pool;
     private WaitForSeconds _waitForSeconds;
-    private SpawnerBomb _spawnerBomb;
+    public event Action ViewUpdated;
 
     private float _minRandomPosition = -15f;
     private float _maxRandomPosition = 15f;
     private int _positionY = 15;
     private int _time = 2;
-    private int _capacity = 5;
-    private int _spawnedCubes = 0;
-    private int _activeCubeCount = 0;
+
+    public ObjectPool<Cube> Pool { get; private set; }
+
+    public int ActiveCubeCount { get; private set; }
+
+    public int SpawnedCubes { get; private set; }
 
     private void Awake()
     {
-        _spawnerBomb = GetComponent<SpawnerBomb>();
-        _pool = new ObjectPool<Cube>();
-
-        for (int i = 0; i < _capacity; i++)
-        {
-            _pool.Create(_cubePrefab);
-        }
+        Pool = new ObjectPool<Cube>(_cubePrefab);
 
         StartCoroutine(SpawnRoutine());
-    }
-
-    private void Update()
-    {
-        _textMeshPro.text = $"Кубов заспавнено: {_spawnedCubes}\n" +
-                              $"Кубов создано: {_pool.CreatedObjectsCount}\n" +
-                              $"Активные Кубы: {_activeCubeCount}";
     }
 
     public IEnumerator SpawnRoutine()
@@ -45,39 +34,35 @@ public class SpawnerCube : MonoBehaviour
 
         while (enabled)
         {
-            if (_pool != null)
+            if (Pool != null)
             {
-                Cube cube = _pool.GetObj();
+                Cube cube = Pool.GetObj(_cubePrefab);
+                OnGet(cube);
 
-                if (cube != null)
-                {
-                    OnGet(cube);
-                    yield return _waitForSeconds;
-                }
-                else
-                {
-                    _pool.Create(_cubePrefab);
-                }
+                yield return _waitForSeconds;
             }
         }
     }
 
     public void OnGet(Cube cube)
     {
-        cube.OnCubeDeactivate += Release;
+        cube.CubeDeactivated += Release;
         cube.transform.position = new Vector3
-            (Random.Range(_minRandomPosition, _maxRandomPosition), _positionY, 
-            Random.Range(_minRandomPosition, _maxRandomPosition));
+            (UnityEngine.Random.Range(_minRandomPosition, _maxRandomPosition), _positionY,
+            UnityEngine.Random.Range(_minRandomPosition, _maxRandomPosition));
         cube.gameObject.SetActive(true);
-        _spawnedCubes++;
-        _activeCubeCount++;
+
+        SpawnedCubes++;
+        ActiveCubeCount++;
     }
 
     public void Release(Cube cube)
     {
-        cube.OnCubeDeactivate -= Release;
+        cube.CubeDeactivated -= Release;
         cube.gameObject.SetActive(false);
         _spawnerBomb.OnGet(cube);
-        _activeCubeCount--;
+        Pool.Return(cube);
+        ActiveCubeCount--;
+        ViewUpdated.Invoke();
     }
 }
