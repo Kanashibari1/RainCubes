@@ -22,18 +22,19 @@ public class SpawnerBomb : MonoBehaviour
     {
         Bomb bomb = Pool.GetObj(_prefab);
 
-        bomb.OnBombDeactivate += Release;
+        bomb.BombDeactivated += Release;
         bomb.transform.position = cube.transform.position;
         bomb.gameObject.SetActive(true);
         bomb.TriggerFade();
 
         SpawnedBombs++;
         ActiveBombCount++;
+        ViewUpdated.Invoke();
     }
 
     public void Release(Bomb bomb)
     {
-        bomb.OnBombDeactivate -= Release;
+        bomb.BombDeactivated -= Release;
         bomb.gameObject.SetActive(false);
         Pool.Return(bomb);
         ActiveBombCount--;

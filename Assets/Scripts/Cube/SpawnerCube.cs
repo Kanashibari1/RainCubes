@@ -54,6 +54,7 @@ public class SpawnerCube : MonoBehaviour
 
         SpawnedCubes++;
         ActiveCubeCount++;
+        ViewUpdated.Invoke();
     }
 
     public void Release(Cube cube)

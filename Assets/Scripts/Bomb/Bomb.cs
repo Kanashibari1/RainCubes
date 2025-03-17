@@ -8,7 +8,7 @@ public class Bomb : MonoBehaviour
     private Transparency _transparency;
     private Exploder _explode;
 
-    public event Action<Bomb> OnBombDeactivate;
+    public event Action<Bomb> BombDeactivated;
 
     private void Awake()
     {
@@ -26,6 +26,6 @@ public class Bomb : MonoBehaviour
     {
         _transparency.FadeCompleted -= Explosion;
         _explode.Bang();
-        OnBombDeactivate.Invoke(this);
+        BombDeactivated.Invoke(this);
     }
 }
